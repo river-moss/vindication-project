@@ -124,7 +124,7 @@
     pp.addEventListener('click', async () => {
       const cur = song.currentSrc || song.src || '';
       if (!cur || cur.includes('your-audio.mp3')) {
-        alert('Set your audio file on <audio id="song" src="./assets/song.mp3">');
+        alert('Set your audio file on <audio id="song" src="song-trimmed.mp3">');
         return;
       }
       if (song.paused){
