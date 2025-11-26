@@ -45,161 +45,112 @@
   <!-- Back to 3 gifts -->
   <a class="fab-back" href="yes.html" aria-label="Back to gifts">←</a>
 
-  <script>
-    // ======= CONFIGURE YOUR CLIP HERE =======
-    const START_S = 52;   // start time in seconds
-    const END_S   = 119.5;  // end time in seconds
-    const FADE_MS = 220; // fade duration at start/end (ms)
-    // ========================================
+<script>
+  const song = document.getElementById('song');
+  const pp   = document.getElementById('pp');
+  const seek = document.getElementById('seek');
+  const tcur = document.getElementById('tcur');
+  const tlen = document.getElementById('tlen');
+  const mute = document.getElementById('mute');
+  const vol  = document.getElementById('vol');
 
-    const song = document.getElementById('song');
-    const pp   = document.getElementById('pp');
-    const seek = document.getElementById('seek');
-    const tcur = document.getElementById('tcur');
-    const tlen = document.getElementById('tlen');
-    const mute = document.getElementById('mute');
-    const vol  = document.getElementById('vol');
+  let userVol = parseFloat(vol.value);
+  let fadeTimer = null;
 
-    // Keep "user volume" separate so fades don't overwrite the slider value
-    let userVol = parseFloat(vol.value);
-    let fadeTimer = null;
+  const fmt = s => {
+    s = Math.max(0, Math.floor(s));
+    const m = Math.floor(s/60);
+    const ss = String(s % 60).padStart(2,'0');
+    return `${m}:${ss}`;
+  };
 
-    const fmt = s => {
-      s = Math.max(0, Math.floor(s));
-      const m = Math.floor(s/60);
-      const ss = String(s % 60).padStart(2,'0');
-      return `${m}:${ss}`;
+  function setBtnPlaying(isPlaying){
+    pp.textContent = isPlaying ? '⏸ Pause' : '▶ Play';
+  }
+
+  function applyVolume(target, ms=0){
+    const base = userVol;
+    const from = song.volume;
+    const to = Math.min(1, Math.max(0, base * target));
+    if (fadeTimer) cancelAnimationFrame(fadeTimer);
+    if (ms <= 0){ song.volume = to; return; }
+    const t0 = performance.now();
+    const step = () => {
+      const p = Math.min(1, (performance.now()-t0)/ms);
+      song.volume = from + (to-from)*p;
+      if (p < 1) fadeTimer = requestAnimationFrame(step);
     };
+    fadeTimer = requestAnimationFrame(step);
+  }
 
-    function setBtnPlaying(isPlaying){
-      pp.textContent = isPlaying ? '⏸ Pause' : '▶ Play';
+  function updateTimeUI(){
+    const dur = song.duration || 0;
+    const pos = song.currentTime;
+
+    tcur.textContent = fmt(pos);
+    tlen.textContent = fmt(dur);
+
+    seek.value = dur ? (pos / dur).toFixed(3) : 0;
+  }
+
+  async function ensureMetadata(){
+    if (song.readyState >= 1) return;
+    await new Promise(res => song.addEventListener('loadedmetadata', res, { once: true }));
+  }
+
+  function playFromStart(){
+    song.currentTime = 0;
+    setBtnPlaying(true);
+    song.play().catch(()=>{});
+    applyVolume(0, 0);
+    applyVolume(1, 220);
+  }
+
+  // Play/pause button
+  pp.addEventListener('click', async () => {
+    if (song.paused){
+      await ensureMetadata();
+      playFromStart();
+    } else {
+      song.pause();
+      setBtnPlaying(false);
     }
+  });
 
-    function clampSegment(){
-      // Ensure song metadata loaded and clip bounds are sane
-      const dur = isFinite(song.duration) ? song.duration : END_S;
-      const start = Math.min(Math.max(0, START_S), Math.max(0, dur-0.25));
-      const end   = Math.max(start + 0.25, Math.min(END_S, dur));
-      return {start, end};
+  // NORMAL playback — no segment clipping, no forced looping
+  song.addEventListener('timeupdate', updateTimeUI);
+
+  // Seek bar (0–100%)
+  seek.addEventListener('input', () => {
+    const dur = song.duration;
+    if (dur) {
+      song.currentTime = parseFloat(seek.value) * dur;
     }
+  });
 
-    function applyVolume(target, ms=0){
-      // Smoothly go to target volume (multiplied by user's slider)
-      const base = userVol;
-      const from = song.volume;
-      const to = Math.min(1, Math.max(0, base * target));
-      if (fadeTimer) cancelAnimationFrame(fadeTimer);
-      if (ms <= 0){ song.volume = to; return; }
-      const t0 = performance.now();
-      const step = () => {
-        const p = Math.min(1, (performance.now()-t0)/ms);
-        song.volume = from + (to-from)*p;
-        if (p < 1) fadeTimer = requestAnimationFrame(step);
-      };
-      fadeTimer = requestAnimationFrame(step);
-    }
-
-    function updateTimeUI(){
-      const {start, end} = clampSegment();
-      const pos = Math.min(Math.max(song.currentTime, start), end);
-      tcur.textContent = fmt(pos - start);
-      tlen.textContent = fmt(end - start);
-      // Update slider (0..1 within the segment)
-      seek.value = ((pos - start) / (end - start)).toFixed(3);
-    }
-
-    async function ensureMetadata(){
-      if (song.readyState >= 1) return;
-      await new Promise(res => song.addEventListener('loadedmetadata', res, { once: true }));
-    }
-
-    function playFromStart(){
-      const {start} = clampSegment();
-      song.currentTime = start;
-      setBtnPlaying(true);
-      song.play().catch(()=>{ /* autoplay may be blocked until user gesture */ });
-      // Fade in from silence to userVol
-      applyVolume(0, 0);     // start silent
-      applyVolume(1, FADE_MS);
-    }
-
-    // ✅ FIXED: correct Play/Pause handler (no false block on song.mp3)
-    pp.addEventListener('click', async () => {
-      const cur = song.currentSrc || song.src || '';
-      if (!cur || cur.includes('your-audio.mp3')) {
-        alert('Set your audio file on <audio id="song" src="song-trimmed.mp3">');
-        return;
-      }
-      if (song.paused){
-        await ensureMetadata(); // make sure seek works
-        playFromStart();
-      } else {
-        song.pause();
-        setBtnPlaying(false);
-      }
-    });
-
-    // Loop within [start,end], with fade-out before looping
-    song.addEventListener('timeupdate', () => {
-      const {start, end} = clampSegment();
-      if (song.currentTime < start) song.currentTime = start;
-
-      const remaining = end - song.currentTime;
-      if (remaining <= FADE_MS/1000 + 0.02){
-        // Start fade-out to zero before the loop
-        applyVolume(0, Math.max(40, remaining*1000));
-      }
-      if (song.currentTime >= end){
-        playFromStart(); // restarts and fades in again
-      }
-      updateTimeUI();
-    });
-
-    // Slider seek inside the segment
-    seek.addEventListener('input', () => {
-      const {start, end} = clampSegment();
-      const p = parseFloat(seek.value);
-      song.currentTime = start + p * (end - start);
-      updateTimeUI();
-    });
-
-    // Mute / volume
-    mute.addEventListener('click', () => {
-      const pressed = mute.getAttribute('aria-pressed') === 'true';
-      if (pressed){
-        mute.setAttribute('aria-pressed','false');
-        mute.textContent = '🔊';
-        userVol = parseFloat(vol.value);
-      } else {
-        mute.setAttribute('aria-pressed','true');
-        mute.textContent = '🔇';
-        userVol = 0;
-      }
-      // Apply immediately (keep fade multiplier at 1)
-      const currentFactor = song.volume > 0 ? song.volume / Math.max(0.0001, parseFloat(vol.value)) : 1;
-      song.volume = userVol * currentFactor;
-    });
-
-    vol.addEventListener('input', () => {
+  // Mute / volume
+  mute.addEventListener('click', () => {
+    const pressed = mute.getAttribute('aria-pressed') === 'true';
+    if (pressed){
+      mute.setAttribute('aria-pressed','false');
+      mute.textContent = '🔊';
       userVol = parseFloat(vol.value);
-      // Keep current fade factor
-      const factor = Math.min(1, Math.max(0, song.volume / Math.max(0.0001, userVol)));
-      song.volume = userVol * factor;
-    });
+    } else {
+      mute.setAttribute('aria-pressed','true');
+      mute.textContent = '🔇';
+      userVol = 0;
+    }
+    song.volume = userVol;
+  });
 
-    // After metadata, initialize UI & clamp seek bounds
-    song.addEventListener('loadedmetadata', () => {
-      updateTimeUI();
-    });
+  vol.addEventListener('input', () => {
+    userVol = parseFloat(vol.value);
+    song.volume = userVol;
+  });
 
-    // Reset button label when audio ends for any reason
-    song.addEventListener('ended', () => setBtnPlaying(false));
+  song.addEventListener('loadedmetadata', updateTimeUI);
 
-    // Optional: quick error logger
-    song.addEventListener('error', () => {
-      console.error('Audio error:', song.error, 'currentSrc:', song.currentSrc);
-      alert('Audio failed to load. Check that ./assets/song.mp3 exists and use Live Server.');
-    });
+  song.addEventListener('ended', () => setBtnPlaying(false));
   </script>
 </body>
 </html>
