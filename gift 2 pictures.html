@@ -31,9 +31,8 @@
         <button id="mute" class="btn btn-pill" type="button" aria-pressed="false" aria-label="Mute / Unmute">🔊</button>
         <input id="vol" class="vol" type="range" min="0" max="1" step="0.01" value="0.9" aria-label="Volume">
         <!-- Hidden native audio element -->
-        <audio id="bgMusic" autoplay loop playsinline>
-            <source src="song-trimmed.mp3" type="audio/mpeg">
-        </audio>
+        <audio id="song" preload="metadata" src="song-trimmed.mp3"
+
       </div>
     
       
