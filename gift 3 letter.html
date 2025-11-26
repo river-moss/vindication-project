@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>letter</title>
+
+  <link rel="stylesheet" href="styles.css" />
+
+  <style>
+    /* --------- LAYOUT --------- */
+    .letter-layout {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-top: 40px;
+      gap: 40px;
+    }
+
+    .letter-text {
+      width: 55%;
+      padding-left: 20px;
+    }
+
+    .letter-title {
+      text-align: left;
+      font-size: 2.6rem;
+      margin-bottom: 25px;
+      color: #8e1e1e;
+      font-weight: 700;
+    }
+
+    .letter-text p {
+      font-size: 1.15rem;
+      line-height: 1.9;
+      color: #8e1e1e;
+      margin-bottom: 22px;
+      text-align: left;
+    }
+
+    /* --------- POLAROID IMAGE --------- */
+    .polaroid {
+      width: 38%;
+      background: #fff;
+      padding: 18px 18px 26px;
+      border: 4px solid black;
+      box-shadow: 6px 10px 0 rgba(0, 0, 0, 0.25);
+      transform: rotate(2deg);
+
+      /* positioning */
+      margin-top: 90px;   /* moves image DOWN */
+      margin-right: -40px; /* moves image LEFT */
+    }
+
+    .polaroid img {
+      width: 100%;
+      display: block;
+    }
+
+    .pin {
+      position: absolute;
+      top: -18px;
+      right: -18px;
+      font-size: 22px;
+      background: #b0373a;
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 50%;
+      box-shadow: 0 2px 3px rgba(0,0,0,0.3);
+    }
+
+    /* Decorative SVG positioning */
+    .decor { position: absolute; opacity: 0.18; }
+    .decor.tl { top: 20px; left: 20px; width: 80px; }
+    .decor.tr { top: 40px; right: 60px; width: 70px; opacity: 0.22; }
+    .decor.bl { bottom: 40px; left: 40px; width: 90px; opacity: 0.16; }
+  </style>
+</head>
+
+<body class="bg-paper">
+
+  <!-- Decorative elements -->
+  <img class="decor tl" alt=""
+    src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'><path d='M32 6l8 18 20 3-15 13 4 20-17-10-17 10 4-20-15-13 20-3z' fill='%23b0373a' opacity='.22'/></svg>">
+
+  <img class="decor tr" alt=""
+    src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='54' height='54'><path d='M27 6v42M6 27h42' stroke='%23b0373a' stroke-width='6' stroke-linecap='round' opacity='.28'/></svg>">
+
+  <img class="decor bl" alt=""
+    src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='70' height='70'><path d='M35 5l8 18 20 3-15 13 4 20-17-10-17 10 4-20-15-13 20-3z' fill='%23b0373a' opacity='.18'/></svg>">
+
+
+  <main class="wrap">
+
+    <section class="letter-layout">
+
+      <!-- TEXT -->
+      <article class="letter-text">
+
+        <h1 class="letter-title">HAPPY ANNIVERSARY MY PRECIOUS GIRLFRIEND! </h1>
+
+        <p>
+          Today we celebrate us, for the 8 months we've seen through together. It has been beautiful, it has been sad, it has been boring and it has been tiring.
+          Nothing I would change, as it is all the memories I hold close to my heart. 
+          From your smile that brings me joy to the kindness you show me, you truly lessen the burden of living for me.
+          You've filled my life with so much learning, understanding, patience and joy. And for that I am eternally grateful.
+          Thank you for manking me laugh, making me feel better (though you don't realise it, and being tender when allowing me to feel.
+          I love the days we go out, stay in, meet, don't meet, because they all keep reminding me how much I love spending time with you.
+          Thank you for sticking around for 8 months thambi. Here's to many more!
+        </p>
+
+        <p>
+          I would want you to know how deeply you’re loved and cherished. For the things you do and don't, for the things you say and don't.
+          For when you come anytime for when I need you, ecen when you are so tired. I hope you know that means so much to me.
+          I am writing this loooking at you right now and you've got some custard donut crumbs on your face while being on your phone. That reminds me the time in the bus when you said you'd wipe away the mayo off your loved one's face.
+          I think by now you know now my standing on that have long changed. I will wipe away the crumbs on your face, always.
+          No matter what the future holds, I'll wish for us to come out of it better. 
+        </p>
+
+      </article>
+
+      <!-- IMAGE -->
+      <aside class="polaroid-frame">
+       <div class="polaroid-inner">
+         <img src="./assets/letter photo.jpg" alt="A favorite memory">
+       </div>
+       <span class="pin">★</span>
+      </aside>
+
+
+    </section>
+
+  </main>
+
+  <!-- Back button -->
+  <a class="fab-back" href="yes.html" aria-label="Back to gifts">←</a>
+
+  <script src="scripts.js" defer></script>
+</body>
+</html>
